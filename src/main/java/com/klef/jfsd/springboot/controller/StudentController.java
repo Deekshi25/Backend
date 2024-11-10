@@ -1,175 +1,134 @@
 package com.klef.jfsd.springboot.controller;
 
-import java.text.ParseException;
+import java.sql.Blob;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
-import com.klef.jfsd.springboot.model.Milestone;
+
+import com.klef.jfsd.springboot.model.Project;
 import com.klef.jfsd.springboot.model.Student;
 import com.klef.jfsd.springboot.service.StudentService;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-@Controller
+@RestController
 public class StudentController
 {
 	@Autowired
 	private StudentService studentService;
+	private String email;
 	
-	@GetMapping("/")
-	public ModelAndView home()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("home");
-		return mv;
-	}
-	
-	@GetMapping("/login")
-	public ModelAndView login()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("login");
-		return mv;
-	}
-	
-	
-	@GetMapping("/about")
-	public ModelAndView about()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("about");
-		return mv;
-	}
-	
-	@GetMapping("/contact")
-	public ModelAndView contact()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("contact");
-		return mv;
-	}
-	
-	@GetMapping("/studenthome")
-	public ModelAndView studenthome()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("studenthome");
-		return mv;
-	}
 	
 	
 	@PostMapping("/checkstudentlogin")
-	public ModelAndView checkStudentLogin(HttpServletRequest request)
+	public Student checkStudentLogin(@RequestParam("email") String email , @RequestParam("password") String password)
 	{
-		String email = request.getParameter("email");
-		String password = request.getParameter("password");
-		
+			
 		Student student = studentService.checkStudentLogin(email, password);
-		
-		if(student!=null)
-		{
-			ModelAndView mv = new ModelAndView();
-			mv.setViewName("studenthome");
-			return mv;
-		}
-		else
-		{
-			ModelAndView mv = new ModelAndView();
-			mv.setViewName("loginfail");
-			return mv;
-		}
+		return student;
 		
 	}
+
 	
-	@GetMapping("/profile")
-	public ModelAndView profile()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("profile");
-		return mv;
-	}
-	@GetMapping("/projects")
-	public ModelAndView projects()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("projects");
-		return mv;
-	}
-	@GetMapping("/portfolio")
-	public ModelAndView portfolio()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("portfolio");
-		return mv;
-	}
-	@GetMapping("/stulogout")
-	public ModelAndView stulogout()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("stulogout");
-		return mv;
-	}
-	
-	@GetMapping("/milestoneinsertform")
-	public ModelAndView milestoneInsertForm()
-	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("milestoneinsertform");
-		return mv;
-	}
-	
-	
-	
-	@PostMapping("/addmilestone")
-	public String addMilestone(HttpServletRequest request) throws ParseException
-	{
-		 int id = Integer.parseInt(request.getParameter("id"));
-         String name = request.getParameter("name");
-         String description = request.getParameter("description");
-         String dueDateString = request.getParameter("duedate");
-         String completedAtString = request.getParameter("completedAt");
+    @PostMapping("/createproject")
+    public String createProject(
+            @RequestParam("title") String title,
+            @RequestParam("description") String description,
+            @RequestParam("image") MultipartFile image,
+            @RequestParam("pdf") MultipartFile pdf,
+            @RequestParam("zip") MultipartFile zip,
+            @RequestParam("file") MultipartFile file) throws Exception {
+
+        Blob fileBlob = new javax.sql.rowset.serial.SerialBlob(file.getBytes());
+        Blob imageBlob = new javax.sql.rowset.serial.SerialBlob(image.getBytes());
+        Blob pdfBlob = new javax.sql.rowset.serial.SerialBlob(pdf.getBytes());
+        Blob zipBlob = new javax.sql.rowset.serial.SerialBlob(zip.getBytes());
+
         
-         
-         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-         Date dueDate = dateFormat.parse(dueDateString);
-         Date completedAt = completedAtString.isEmpty() ? null : dateFormat.parse(completedAtString);
-         
-         Milestone milestone = new Milestone();
-         milestone.setId(id);
-         milestone.setName(name);
-         milestone.setDescription(description);
-         milestone.setDueDate(dueDate);
-         milestone.setCompletedAt(completedAt);
-       
-		return studentService.addMilestone(milestone);
-		
-	}
+        Project project = new Project();
+        project.setTitle(title);
+        project.setDescription(description);
+
+        project.setPhase(Project.ProjectPhase.NOT_STARTED); 
+        project.setImage(imageBlob);  
+        project.setPdf(pdfBlob);  
+        project.setZip(zipBlob);   
+        project.setFile(fileBlob); 
+        
+        return studentService.createProject(project);
+    }
 	
-	@GetMapping("/viewallmilestones")
-	public ModelAndView ViewAllMilestones()
+    @GetMapping("viewallprojects")
+	public List<Project> viewallprojects()
 	{
-		ModelAndView mv = new ModelAndView();
-		mv.setViewName("ViewAllMilestones");
-		return mv;
+		return studentService.viewAllProjects();
 	}
-	
-	
-	@PostMapping("/updatemilestone")
-	public String updateMilestone(Milestone milestone)
+
+    @GetMapping("displayprojectbyid")
+	public Project displayprojectbyid(@RequestParam("id")int pid)
 	{
-		return studentService.addMilestone(milestone);	
+		return studentService.viewProjectByID(pid);
 	}
-	
-	
-	@PostMapping("/deletemilestone")
-	public String deleteMilestone(int mid)
-	{
-		return studentService.deleteMilestone(mid);	
-	}
+    
+    @GetMapping("displayprojectimage")
+    public ResponseEntity<byte[]> displayProjectImage(@RequestParam int projectId) throws Exception {
+        Project project = studentService.viewProjectByID(projectId);
+        byte[] image = project.getImage().getBytes(1, (int) project.getImage().length());
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.IMAGE_PNG)
+                             .body(image);
+    }
+
+    
+    
+	   
+    @GetMapping("displayprojectpdf")
+    public ResponseEntity<byte[]> displayProjectPdf(@RequestParam int projectId) throws Exception {
+        Project project = studentService.viewProjectByID(projectId);
+        byte[] pdf = project.getPdf().getBytes(1, (int) project.getPdf().length());
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.APPLICATION_PDF)
+                             .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"project.pdf\"")
+                             .body(pdf);
+    }
+
+
+    @GetMapping("displayprojectzip")
+    public ResponseEntity<byte[]> displayProjectZip(@RequestParam int projectId) throws Exception {
+        Project project = studentService.viewProjectByID(projectId);
+        byte[] zip = project.getZip().getBytes(1, (int) project.getZip().length());
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                             .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"project.zip\"")
+                             .body(zip);
+    }
+
+    @GetMapping("displayprojectfile")
+    public ResponseEntity<byte[]> displayProjectText(@RequestParam int projectId) throws Exception {
+        Project project = studentService.viewProjectByID(projectId);
+        byte[] text = project.getFile().getBytes(1, (int) project.getFile().length());
+
+        return ResponseEntity.ok()
+                             .contentType(MediaType.TEXT_PLAIN)
+                             .body(text);
+    }
+
 }
