@@ -1,6 +1,7 @@
 
 package com.klef.jfsd.springboot.model;
 
+import java.sql.Blob;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -49,6 +50,12 @@ public class Student
 
     @Column(name = "scontact",length = 15, nullable = false, unique = true)
     private String contact;  
+    
+    @Column
+    private Blob profile;
+    
+    @Column
+    private Blob Resume;
   
 
   @Override
@@ -145,6 +152,22 @@ public class Student
   public void setContact(String contact) {
     this.contact = contact;
   }
+
+public Blob getProfile() {
+	return profile;
+}
+
+public void setProfile(Blob profile) {
+	this.profile = profile;
+}
+
+public Blob getResume() {
+	return Resume;
+}
+
+public void setResume(Blob resume) {
+	Resume = resume;
+}
 
   
   

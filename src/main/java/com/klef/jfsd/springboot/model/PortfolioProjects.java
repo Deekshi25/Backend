@@ -21,10 +21,9 @@ import javax.sql.rowset.serial.SerialClob;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
-@Table(name = "project_table")
-public class Project {
+@Table(name = "portfolio_projects_table")
+public class PortfolioProjects {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int projectId;
 
 	@Column(length=30, nullable = false)
@@ -32,9 +31,6 @@ public class Project {
 
     @Column(length=100, nullable = false)
     private String description;
-
-
-   
 
     public enum ProjectPhase {
         NOT_STARTED,
@@ -111,7 +107,7 @@ public class Project {
     @JsonIgnore
     private Blob reportCard;
     
-   @OneToMany(mappedBy = "project")
+   @OneToMany(mappedBy = "portfolioProject")
     private List<Media> mediaList;
    //private  List<Milestone> milestones;
    //private ProjectFeedback feedback;

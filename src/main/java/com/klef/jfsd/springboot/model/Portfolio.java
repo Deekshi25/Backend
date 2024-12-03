@@ -1,47 +1,61 @@
 package com.klef.jfsd.springboot.model;
 
 import jakarta.persistence.*;
+
+import java.sql.Blob;
 import java.util.Date;
 import java.util.List;
 
 @Entity
+@Table(name = "portfolio_table")
 public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    
     private int portfolioId;
 
-    @Column(length = 30, nullable = false)
+    @Column(length = 500, nullable = false)
     private String summary;
+   
+    @Column(length = 255,nullable = false)
+    private int studentId;
 
-   @Column(length = 30, nullable = false)
-    private String profilePictureUrl;
+    private String projectIds;
+    
+    
+    
+	public int getPortfolioId() {
+		return portfolioId;
+	}
 
-    @Column(length = 50, nullable = false)
-    private List<String> skillNames; // You might want to reconsider this if you need to store as a single string
+	public void setPortfolioId(int portfolioId) {
+		this.portfolioId = portfolioId;
+	}
 
-    @Column(length = 100)
-    private List<String> certifications; // Certification class will be created later
+	public String getSummary() {
+		return summary;
+	}
 
-    @Column(length = 100)
-    private List<String> internships; // Internship class will be created later
+	public void setSummary(String summary) {
+		this.summary = summary;
+	}
 
-    @Column(length = 255)
-    private List<String> testimonials;
+	public int getStudentId() {
+		return studentId;
+	}
 
-    @Column(length = 100, nullable = false)
-    private String educationInstitution;
+	public void setStudentId(int studentId) {
+		this.studentId = studentId;
+	}
 
-    @Column(length = 50, nullable = false)
-    private String educationDegree;
+	public String getProjectIds() {
+		return projectIds;
+	}
 
-    @Column( nullable = false)
-    private Date educationStartDate;
+	public void setProjectIds(String projectIds) {
+		this.projectIds = projectIds;
+	} 
 
-    @Column( nullable = false)
-    private Date educationEndDate;
-
-    // private List<Project> projects; // List of projects
-
-    // Getters and Setters and toString
+    
 
 }
