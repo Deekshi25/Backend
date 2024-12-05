@@ -14,12 +14,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.klef.jfsd.springboot.model.Faculty;
+import com.klef.jfsd.springboot.model.GradeProject;
 import com.klef.jfsd.springboot.model.PortfolioData;
+import com.klef.jfsd.springboot.model.PortfolioFeedback;
 import com.klef.jfsd.springboot.model.Project;
-import com.klef.jfsd.springboot.model.Project.ProjectCheckpoint;
 import com.klef.jfsd.springboot.model.ProjectFeedback;
 import com.klef.jfsd.springboot.model.Student;
 import com.klef.jfsd.springboot.service.FacultyService;
@@ -39,10 +41,6 @@ public class FacultyController
 	@Autowired
 	private ReportGenerator reportGenerator;
 	
-    @GetMapping("/checkpoints")
-    public ProjectCheckpoint[] getAllProjectCheckpoints() {
-        return ProjectCheckpoint.getAllValues();
-    }
 
 	@PostMapping("/checkfacultylogin")
     public Faculty checkFacultyLogin(@RequestBody Map<String, String> formData) {
@@ -71,10 +69,30 @@ public class FacultyController
 	    return service.viewProjectsByFaculty(facultyId);
 	}
 
-	@PostMapping("gradeproject")
-	public String gradeProject( @RequestBody ProjectFeedback pf) {
-	    return service.gradeProject(pf);
-	}
+    @PostMapping("/gradeproject")
+    public ResponseEntity<String> gradeProject(@RequestBody GradeProject pfDTO) {
+        // Call the gradeProject method from the service
+        String result = service.gradeProject(pfDTO);
+
+        // Return the result as a response
+        return ResponseEntity.ok(result);
+    }
+    
+    @PostMapping("/reviewportfolio")
+    public String reviewPortfolio(@RequestBody PortfolioFeedback portfolioFeedback)
+    {
+    	
+    	return service.reviewPortfolio(portfolioFeedback);
+    }
+    
+    @PostMapping("/allowproject")
+    public ResponseEntity<String> allowProject(@RequestParam int projectId) {
+        // Call the gradeProject method from the service
+        String result = service.allowProject(projectId);
+
+        // Return the result as a response
+        return ResponseEntity.ok(result);
+    }
 
 	
 	@GetMapping("viewallfeedback")

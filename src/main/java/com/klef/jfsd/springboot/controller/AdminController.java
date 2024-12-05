@@ -5,6 +5,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,14 +16,17 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.klef.jfsd.springboot.model.Admin;
 import com.klef.jfsd.springboot.model.Faculty;
 import com.klef.jfsd.springboot.model.FacultyStudentMapper;
-import com.klef.jfsd.springboot.model.Project;
 import com.klef.jfsd.springboot.model.ProjectFeedback;
 import com.klef.jfsd.springboot.model.Student;
 import com.klef.jfsd.springboot.service.AdminService;
+
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 
 @RestController
 public class AdminController
@@ -41,6 +48,30 @@ public class AdminController
 	{
 		return service.addStudent(student);
 	}	
+	
+	@PostMapping("/addstudentlist")
+	public ResponseEntity<String> addStudents(@RequestParam("file") MultipartFile file) {
+	    try {
+	        String result = service.processAndSaveCSV(file);
+	        return ResponseEntity.ok(result);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+	    }
+	}
+	
+	@PostMapping("/addfacultylist")
+	public ResponseEntity<String> addFacultyFromCSV(@RequestParam("file") MultipartFile file) {
+	    try {
+	        String result = service.processAndSaveFacultyCSV(file);
+	        return ResponseEntity.ok(result);
+	    } catch (Exception e) {
+	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+	    }
+	}
+
+
+	
+	
 	@GetMapping("viewallstudents")
 	public List<Student> viewallstudents()
 	{
@@ -163,6 +194,9 @@ public class AdminController
 		{
 			return service.viewfeedback();
 		}
+	    
+	  
+	
 }
 
 

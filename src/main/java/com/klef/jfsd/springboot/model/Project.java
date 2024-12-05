@@ -1,10 +1,12 @@
 package com.klef.jfsd.springboot.model;
 
 import java.sql.Blob;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -13,234 +15,211 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.MapKeyEnumerated;
 import jakarta.persistence.Table;
-
-import javax.sql.rowset.serial.SerialClob;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "project_table")
 public class Project {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int projectId;
 
-	@Column(length=30, nullable = false)
+    @Column(length = 30, nullable = false)
     private String title;
 
-    @Column(length=100, nullable = false)
+    @Column(length = 100, nullable = false)
     private String description;
 
-
-   
-
     public enum ProjectPhase {
-        NOT_STARTED,
-        ACTIVE,
-        COMPLETED
-    }
-    
-    public enum ProjectCheckpoint {
-        ZERO(0),                 // For 0%
-        TWENTY_FIVE(25),         // For 25%
-        TWENTY_FIVE_TO_FIFTY(37), // For a checkpoint between 25% and 50%
-        FIFTY(50),               // For 50%
-        FIFTY_TO_SEVENTY_FIVE(62), // For a checkpoint between 50% and 75%
-        SEVENTY_FIVE(75),        // For 75%
-        SEVENTY_FIVE_TO_ONE_HUNDRED(87), // For a checkpoint between 75% and 100%
-        ONE_HUNDRED(100);        // For 100%
+        NOT_STARTED("NOT_STARTED", "Project is not yet started", 0),
+        IDEA("IDEA", "Project is in the idea and concept stage.", 20),
+        DESIGN("DESIGN", "Project is in the design phase, working on mockups and wireframes.", 40),
+        BUILD("BUILD", "Development work is underway, coding and implementation.", 60),
+        TESTING("TESTING", "Project is undergoing testing and debugging.", 80),
+        DEPLOYMENT("DEPLOYMENT", "The project is being deployed to production.", 100),
+        COMPLETED("COMPLETED", "Project is Completed", 100);
 
-        private final int value;
+        private final String shortTitle;
+        private final String defaultDescription;
+        private final int percentage;
 
-        // Constructor
-        ProjectCheckpoint(int value) {
-            this.value = value;
+        ProjectPhase(String shortTitle, String defaultDescription, int percentage) {
+            this.shortTitle = shortTitle;
+            this.defaultDescription = defaultDescription;
+            this.percentage = percentage;
         }
 
-        // Getter method
-        public int getValue() {
-            return value;
+        public String getShortTitle() {
+            return shortTitle;
         }
 
-        public static ProjectCheckpoint[] getAllValues() {
-            return values();
+        public String getDefaultDescription() {
+            return defaultDescription;
         }
 
-        // Method to get enum by value (if needed)
-        public static ProjectCheckpoint fromValue(int value) {
-            for (ProjectCheckpoint checkpoint : values()) {
-                if (checkpoint.getValue() == value) {
-                    return checkpoint;
-                }
-            }
-            throw new IllegalArgumentException("Unexpected value: " + value);
-        }
-
-        @Override
-        public String toString() {
-            return value + "%"; // Customize this if you want the string representation of the enum
+        public int getPercentage() {
+            return percentage;
         }
     }
 
-    
-    @Column( nullable = false)
     @Enumerated(EnumType.STRING)
     private ProjectPhase phase;
-    
-    @Column( nullable = false)
-    @Enumerated(EnumType.STRING)
-    private ProjectCheckpoint percentage;
 
-    private boolean checkStatus=false;
-   
-  
-//    private List<Blob> files  = new ArrayList<>();   
-//    private List<Blob> images = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "project_phase_descriptions", joinColumns = @JoinColumn(name = "project_id"))
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "description")
+    private Map<ProjectPhase, String> phaseDescriptions = new HashMap<>();
+
+    @ElementCollection
+    @CollectionTable(name = "project_phase_grades", joinColumns = @JoinColumn(name = "project_id"))
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "grade")
+    private Map<ProjectPhase, String> phaseGrades = new HashMap<>();
+
+    @ElementCollection
+    @CollectionTable(name = "project_phase_percentages", joinColumns = @JoinColumn(name = "project_id"))
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "percentage")
+    private Map<ProjectPhase, Integer> phasePercentages = new HashMap<>();
+
+    private boolean checkStatus = false;
+
     @JsonIgnore
+    @Lob
     private Blob file;
+
     @JsonIgnore
+    @Lob
     private Blob image;
-    
-//    @JsonIgnore
-//    private Blob pdf;
-//    @JsonIgnore
-//    private Blob zip; 
-    
+
     @JsonIgnore
+    @Lob
     private Blob reportCard;
-    
-   @OneToMany(mappedBy = "project")
-    private List<Media> mediaList;
-   //private  List<Milestone> milestones;
-   //private ProjectFeedback feedback;
-    @Column( nullable = false)
+
+    @Column(length = 255)
+    private String projectLink;
+
+    @Column(length = 255)
+    private String technologiesUsed;
+
+    @Column(nullable = false)
     private int studentId;
 
+    // Getters and Setters
     public int getProjectId() {
-		return projectId;
-	}
+        return projectId;
+    }
 
-	public void setProjectId(int projectId) {
-		this.projectId = projectId;
-	}
+    public void setProjectId(int projectId) {
+        this.projectId = projectId;
+    }
 
-	public String getTitle() {
-		return title;
-	}
+    public String getTitle() {
+        return title;
+    }
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
+    public ProjectPhase getPhase() {
+        return phase;
+    }
 
-	public ProjectPhase getPhase() {
-		return phase;
-	}
+    public void setPhase(ProjectPhase phase) {
+        this.phase = phase;
+    }
 
-	public void setPhase(ProjectPhase phase) {
-		this.phase = phase;
-	}
+    public Map<ProjectPhase, String> getPhaseDescriptions() {
+        return phaseDescriptions;
+    }
 
-//	public List<Blob> getFiles() {
-//		return files;
-//	}
-//
-//	public void setFiles(List<Blob> files) {
-//		this.files = files;
-//	}
+    public void setPhaseDescriptions(Map<ProjectPhase, String> phaseDescriptions) {
+        this.phaseDescriptions = phaseDescriptions;
+    }
 
-//	public List<Blob> getImages() {
-//		return images;
-//	}
-//
-//	public void setImages(List<Blob> images) {
-//		this.images = images;
-//	}
+    public Map<ProjectPhase, String> getPhaseGrades() {
+        return phaseGrades;
+    }
 
-//	public Blob getPdf() {
-//		return pdf;
-//	}
-//
-//	public void setPdf(Blob pdf) {
-//		this.pdf = pdf;
-//	}
-//
-//	public Blob getZip() {
-//		return zip;
-//	}
-//
-//	public void setZip(Blob zip) {
-//		this.zip = zip;
-//	}
+    public void setPhaseGrades(Map<ProjectPhase, String> phaseGrades) {
+        this.phaseGrades = phaseGrades;
+    }
 
-	public Blob getFile() {
-		return file;
-	}
+    public Map<ProjectPhase, Integer> getPhasePercentages() {
+        return phasePercentages;
+    }
 
-	public void setFile(Blob file) {
-		this.file = file;
-	}
+    public void setPhasePercentages(Map<ProjectPhase, Integer> phasePercentages) {
+        this.phasePercentages = phasePercentages;
+    }
 
-	public Blob getImage() {
-		return image;
-	}
+    public boolean isCheckStatus() {
+        return checkStatus;
+    }
 
-	public void setImage(Blob image) {
-		this.image = image;
-	}
+    public void setCheckStatus(boolean checkStatus) {
+        this.checkStatus = checkStatus;
+    }
 
-	public int getStudentId() {
-		return studentId;
-	}
+    public Blob getFile() {
+        return file;
+    }
 
-	public void setStudentId(int studentId) {
-		this.studentId = studentId;
-	}
+    public void setFile(Blob file) {
+        this.file = file;
+    }
 
-	public List<Media> getMediaList() {
-		return mediaList;
-	}
+    public Blob getImage() {
+        return image;
+    }
 
-	public void setMedia(List<Media> mediaList) {
-		this.mediaList = mediaList;
-	}
+    public void setImage(Blob image) {
+        this.image = image;
+    }
 
-	public boolean isCheckStatus() {
-		return checkStatus;
-	}
+    public Blob getReportCard() {
+        return reportCard;
+    }
 
-	public void setCheckStatus(boolean checkStatus) {
-		this.checkStatus = checkStatus;
-	}
+    public void setReportCard(Blob reportCard) {
+        this.reportCard = reportCard;
+    }
 
-	public void setMediaList(List<Media> mediaList) {
-		this.mediaList = mediaList;
-	}
+    public String getProjectLink() {
+        return projectLink;
+    }
 
-	public ProjectCheckpoint getPercentage() {
-		return percentage;
-	}
+    public void setProjectLink(String projectLink) {
+        this.projectLink = projectLink;
+    }
 
-	public void setCheckpoint(ProjectCheckpoint percentage) {
-		this.percentage = percentage;
-	}
+    public String getTechnologiesUsed() {
+        return technologiesUsed;
+    }
 
-	public Blob getReportCard() {
-		return reportCard;
-	}
+    public void setTechnologiesUsed(String technologiesUsed) {
+        this.technologiesUsed = technologiesUsed;
+    }
 
-	public void setReportCard(Blob reportCard) {
-		this.reportCard = reportCard;
-	}
+    public int getStudentId() {
+        return studentId;
+    }
 
+    public void setStudentId(int studentId) {
+        this.studentId = studentId;
+    }
 }

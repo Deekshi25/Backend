@@ -2,7 +2,6 @@ package com.klef.jfsd.springboot.controller;
 
 
 import java.sql.Blob;
-
 import java.util.List;
 import java.util.Map;
 
@@ -20,14 +19,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.klef.jfsd.springboot.model.Faculty;
+import com.klef.jfsd.springboot.model.GradeProject;
 import com.klef.jfsd.springboot.model.Media;
 import com.klef.jfsd.springboot.model.PortfolioData;
 import com.klef.jfsd.springboot.model.PortfolioRequest;
 import com.klef.jfsd.springboot.model.Project;
+import com.klef.jfsd.springboot.model.ProjectDTO;
 import com.klef.jfsd.springboot.model.ProjectFeedback;
 import com.klef.jfsd.springboot.model.Student;
-import com.klef.jfsd.springboot.model.Project.ProjectCheckpoint;
 import com.klef.jfsd.springboot.service.StudentService;
 
 @RestController
@@ -59,6 +58,7 @@ public class StudentController
 	            @RequestParam("studentId") int studentId,
 	            @RequestParam("title") String title,
 	            @RequestParam("description") String description,
+	            @RequestParam("technologiesUsed") String technologiesUsed,
 	            @RequestParam("image") MultipartFile image,
 	            @RequestParam("file") MultipartFile file) throws Exception {
 
@@ -69,8 +69,8 @@ public class StudentController
 	        Project project = new Project();
 	        project.setTitle(title);
 	        project.setDescription(description);
+	        project.setTechnologiesUsed(technologiesUsed);
 	        project.setPhase(Project.ProjectPhase.NOT_STARTED);  
-	        project.setCheckpoint(ProjectCheckpoint.ZERO);
 	        project.setImage(imageBlob);
 	        project.setFile(fileBlob);
 	        project.setStudentId(studentId);
@@ -78,8 +78,7 @@ public class StudentController
 	        // Save project via the service
 	        return studentService.createProject(project);
 	    }
-	 
-	 
+
 	 @PostMapping("/addmedia")
 	    public String addMedia(
 	            @RequestParam Project project,
@@ -140,15 +139,22 @@ public class StudentController
 
 	 
     @GetMapping("viewallprojects")
-	public List<Project> viewallprojects(@RequestParam("studentId") int studentId)
+	public List<ProjectDTO> viewallprojects(@RequestParam("studentId") int studentId)
 	{
 		return studentService.viewAllProjects(studentId);
 	}
 
     @GetMapping("displayproject")
-    public Project displayProject(@RequestParam int projectId) {
-        return studentService.viewProjectByID(projectId); 
+    public ProjectDTO displayProject(@RequestParam int projectId) {
+        return studentService.viewProjectById(projectId); 
     }
+
+    @GetMapping("/trackproject")
+    public ProjectDTO trackProject(@RequestParam int projectId) {
+        // Call the service to get the project data
+        return studentService.trackProjectByID(projectId);
+    }
+    
 
 
     @GetMapping("displayprojectimage")
@@ -178,8 +184,7 @@ public class StudentController
 
    
     @PutMapping("updateproject")
-    public String updateProject( @RequestBody Project p) {
-    	System.out.println(p.getPercentage());
+    public String updateProject( @RequestBody ProjectDTO p) {
         return studentService.updateProject(p); 
     }
 

@@ -76,7 +76,6 @@ public class ReportGenerator {
             yPosition = writeWrappedTextWithOverflow(document, contentStream, "Project Title: " + project.getTitle(), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
             yPosition = writeWrappedTextWithOverflow(document, contentStream, "Project Description: " + project.getDescription(), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
             yPosition = writeWrappedTextWithOverflow(document, contentStream, "Project Phase: " + project.getPhase(), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
-            yPosition = writeWrappedTextWithOverflow(document, contentStream, "Project Checkpoint (Percentage): " + project.getPercentage(), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
             yPosition = writeWrappedTextWithOverflow(document, contentStream, "Project Status: " + (project.isCheckStatus() ? "Completed" : "In Progress"), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
             yPosition = writeWrappedTextWithOverflow(document, contentStream, "Student ID: " + project.getStudentId(), margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
 
@@ -91,7 +90,6 @@ public class ReportGenerator {
                 int i = 1;
                 for (ProjectFeedback feedback : feedbacks) {
                     yPosition = writeWrappedTextWithOverflow(document, contentStream, "Feedback " + i + ":", margin, yPosition, contentWidth, margin, PDType1Font.HELVETICA, 12);
-                    yPosition = writeWrappedTextWithOverflow(document, contentStream, "    Rating: " + feedback.getRating(), margin + 10, yPosition, contentWidth - 10, margin, PDType1Font.HELVETICA, 12);
                     yPosition = writeWrappedTextWithOverflow(document, contentStream, "    Comments: " + feedback.getComments(), margin + 10, yPosition, contentWidth - 10, margin, PDType1Font.HELVETICA, 12);
                     yPosition -= 10; // Adjust spacing for the next feedback
                     i++;

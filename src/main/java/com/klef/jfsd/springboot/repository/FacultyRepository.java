@@ -9,4 +9,7 @@ import java.util.List;
 public interface FacultyRepository extends JpaRepository<Faculty, Integer>
 {
 	public Faculty findByUsernameAndPassword(String username, String password);
+	
+	public boolean existsByEmail(String email);
+	boolean existsByEmailAndUsername(String email, String username);
 }

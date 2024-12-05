@@ -2,6 +2,8 @@ package com.klef.jfsd.springboot.service;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.klef.jfsd.springboot.model.Admin;
 import com.klef.jfsd.springboot.model.Faculty;
 import com.klef.jfsd.springboot.model.FacultyStudentMapper;
@@ -12,6 +14,8 @@ public interface AdminService
 {
 	public Admin checkadminlogin(String username, String password);
 	public String addStudent(Student s);
+	 public String processAndSaveCSV(MultipartFile file) throws Exception;
+	public List<Student> parseCSV(MultipartFile file) throws Exception ;
 	public String updateStudent(Student s);
 	public List<Student> viewAllStudents();
 	public Student displayStudentByID(int sid);
@@ -29,4 +33,6 @@ public interface AdminService
 	public long checkFacultyStudentMapping(Faculty f,Student s);
 	
 	public List<ProjectFeedback> viewfeedback();
+	public String processAndSaveFacultyCSV(MultipartFile file) throws Exception;
+	public List<Faculty> parseFacultyCSV(MultipartFile file) throws Exception;
 }

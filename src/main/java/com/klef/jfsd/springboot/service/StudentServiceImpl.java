@@ -2,7 +2,9 @@ package com.klef.jfsd.springboot.service;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,8 @@ import com.klef.jfsd.springboot.model.Media;
 import com.klef.jfsd.springboot.model.Portfolio;
 import com.klef.jfsd.springboot.model.PortfolioData;
 import com.klef.jfsd.springboot.model.Project;
+import com.klef.jfsd.springboot.model.Project.ProjectPhase;
+import com.klef.jfsd.springboot.model.ProjectDTO;
 import com.klef.jfsd.springboot.model.ProjectFeedback;
 import com.klef.jfsd.springboot.model.Skills;
 import com.klef.jfsd.springboot.model.Student;
@@ -87,11 +91,93 @@ public class StudentServiceImpl implements StudentService
 	    }
 
 	   
-	    @Override
-	    public List<Project> viewAllProjects(int studentId) {
-	        // Fetch projects that belong to the specific student
-	        return projectRepository.findByStudentId(studentId);
+	  // Fetch all projects for a specific student and map them to DTOs
+	    public List<ProjectDTO> viewAllProjects(int studentId) {
+	        List<Project> projects = projectRepository.findByStudentId(studentId);
+	        return projects.stream()
+	                       .map(this::toDTO)
+	                       .collect(Collectors.toList());
 	    }
+
+	    // Fetch a single project by ID and map it to DTO
+	    public ProjectDTO viewProjectById(int projectId) {
+	        Optional<Project> optionalProject = projectRepository.findById(projectId);
+	        if (optionalProject.isPresent()) {
+	            return toDTO(optionalProject.get());
+	        }
+	        throw new RuntimeException("Project not found with ID: " + projectId);
+	    }
+
+	    public ProjectDTO toDTO(Project project) {
+	        ProjectDTO projectDTO = new ProjectDTO();
+
+	        // Set basic project info
+	        projectDTO.setProjectId(project.getProjectId());
+	        projectDTO.setTitle(project.getTitle());
+	        projectDTO.setDescription(project.getDescription());
+	        projectDTO.setPhase(project.getPhase().getShortTitle());
+
+	        // Set the phase percentages as a map of phase names to percentages
+	        Map<String, Integer> phasePercentages = new HashMap<>();
+	        for (Project.ProjectPhase phase : Project.ProjectPhase.values()) {
+	            phasePercentages.put(phase.name(), project.getPhasePercentages().get(phase));
+	        }
+	        projectDTO.setPhasePercentages(phasePercentages);
+
+	        // Set the phase descriptions and grades using the ElementCollection maps
+	        Map<String, String> phaseDescriptions = project.getPhaseDescriptions().entrySet().stream()
+	            .collect(Collectors.toMap(entry -> entry.getKey().name(), Map.Entry::getValue));
+	        projectDTO.setPhaseDescriptions(phaseDescriptions);
+
+	        Map<String, String> phaseGrades = project.getPhaseGrades().entrySet().stream()
+	            .collect(Collectors.toMap(entry -> entry.getKey().name(), Map.Entry::getValue));
+	        projectDTO.setPhaseGrades(phaseGrades);
+
+	        // Set additional project info
+	        projectDTO.setCheckStatus(project.isCheckStatus());
+	        projectDTO.setProjectLink(project.getProjectLink());
+	        projectDTO.setTechnologiesUsed(project.getTechnologiesUsed());
+	        projectDTO.setStudentId(project.getStudentId());
+
+	        return projectDTO;
+	    }
+
+	
+
+	    @Override
+	    public ProjectDTO trackProjectByID(int pid) {
+	        Optional<Project> projectOpt = projectRepository.findById(pid);
+	        if (projectOpt.isPresent()) {
+	            Project project = projectOpt.get();
+
+	            // Create a ProjectDTO object to return
+	            ProjectDTO projectDTO = new ProjectDTO();
+	            projectDTO.setProjectId(project.getProjectId());
+	            projectDTO.setTitle(project.getTitle());
+
+	            // Set Phase Descriptions, Grades, and Percentages
+	            Map<String, String> phaseDescriptions = new HashMap<>();
+	            Map<String, String> phaseGrades = new HashMap<>();
+	            Map<String, Integer> phasePercentages = new HashMap<>();
+
+	            for (Project.ProjectPhase phase : Project.ProjectPhase.values()) {
+	                // Using the project object to get the correct data
+	                phaseDescriptions.put(phase.name(), project.getPhaseDescriptions().get(phase));
+	                phaseGrades.put(phase.name(), project.getPhaseGrades().get(phase));
+	                phasePercentages.put(phase.name(), project.getPhasePercentages().get(phase));
+	            }
+
+	            projectDTO.setPhaseDescriptions(phaseDescriptions);
+	            projectDTO.setPhaseGrades(phaseGrades);
+	            projectDTO.setPhasePercentages(phasePercentages);
+
+	            return projectDTO;
+	        } else {
+	            // If no project is found, return null or handle as needed
+	            return null;
+	        }
+	    }
+
 
 	    // Delete a project - checks if the project belongs to the student before deletion
 	    @Override
@@ -109,27 +195,55 @@ public class StudentServiceImpl implements StudentService
 	    
 	    // Update a project - checks if the project belongs to the student before updating
 	    @Override
-	    public String updateProject(Project p) {
+	    public String updateProject(ProjectDTO p) {
 	        Optional<Project> obj = projectRepository.findById(p.getProjectId());
-	        String msg = null;
+	        String msg;
 
 	        if (obj.isPresent()) {
 	            Project project = obj.get();
 
-	            // Update only the title, description, and phase fields
+	            // Update the title, description, and checkStatus fields
 	            project.setTitle(p.getTitle());
 	            project.setDescription(p.getDescription());
-	            project.setPhase(p.getPhase());
-	            project.setCheckpoint(p.getPercentage());
-	            project.setCheckStatus(p.isCheckStatus());;
+	            project.setCheckStatus(p.isCheckStatus());
 
+	            // Convert String to ProjectPhase and update the phase field
+	            try {
+	                ProjectPhase phaseEnum = ProjectPhase.valueOf(p.getPhase());
+	                project.setPhase(phaseEnum);
+	            } catch (IllegalArgumentException e) {
+	                return "Invalid project phase provided: " + p.getPhase();
+	            }
+
+	            // Update phase descriptions
+	            Map<String, String> phaseDescriptions = p.getPhaseDescriptions();
+	            if (phaseDescriptions != null) {
+	                Map<ProjectPhase, String> updatedPhaseDescriptions = new HashMap<>();
+
+	                for (Map.Entry<String, String> entry : phaseDescriptions.entrySet()) {
+	                    try {
+	                        // Convert the String phase to ProjectPhase enum
+	                        ProjectPhase phaseEnum = ProjectPhase.valueOf(entry.getKey());
+	                        updatedPhaseDescriptions.put(phaseEnum, entry.getValue());
+	                    } catch (IllegalArgumentException e) {
+	                        return "Invalid phase in phase descriptions: " + entry.getKey();
+	                    }
+	                }
+
+	                // Update the phaseDescriptions in the project
+	                project.setPhaseDescriptions(updatedPhaseDescriptions);
+	            }
+
+	            // Save the updated project back to the database
 	            projectRepository.save(project);
-	            msg = "Project Updated Successfully";
+	            msg = "Project and Descriptions Updated Successfully";
 	        } else {
 	            msg = "Project ID Not Found";
 	        }
+
 	        return msg;
 	    }
+
 
 	    
 
@@ -298,7 +412,7 @@ public class StudentServiceImpl implements StudentService
 		    // projects for the student
 		    List<Project> projects = projectRepository.findByStudentId(sid);
 
-		    System.out.println(projects.get(0).getStudentId());
+		 
 		    // feedbacks for these projects
 		    List<ProjectFeedback> feedbackList = new ArrayList<>();
 		    for (Project project : projects) {
@@ -314,4 +428,5 @@ public class StudentServiceImpl implements StudentService
 			return projectRepository.countByStudentId(sid);
 		}
 		
+	
 	    }

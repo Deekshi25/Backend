@@ -12,9 +12,6 @@ public class ProjectFeedback {
     @Column(nullable=false)
     private int projectid;
 
-    @Column(nullable=false)
-    private int rating; 
-
     @Column(length=500,nullable=false)
     private String comments; 
 
@@ -39,13 +36,6 @@ public class ProjectFeedback {
 		this.projectid = projectid;
 	}
 
-	public int getRating() {
-		return rating;
-	}
-
-	public void setRating(int rating) {
-		this.rating = rating;
-	}
 
 	public String getComments() {
 		return comments;

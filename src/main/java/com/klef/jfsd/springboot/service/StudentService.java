@@ -10,6 +10,7 @@ import com.klef.jfsd.springboot.model.Portfolio;
 import com.klef.jfsd.springboot.model.PortfolioData;
 import com.klef.jfsd.springboot.model.PortfolioProjects;
 import com.klef.jfsd.springboot.model.Project;
+import com.klef.jfsd.springboot.model.ProjectDTO;
 import com.klef.jfsd.springboot.model.ProjectFeedback;
 import com.klef.jfsd.springboot.model.Skills;
 import com.klef.jfsd.springboot.model.Student;
@@ -20,10 +21,10 @@ public interface StudentService
 {
     public Student checkStudentLogin(String email ,String password);
 	public String createProject(Project p);
-	public Project viewProjectByID(int pid);
+	public ProjectDTO viewProjectById(int pid);
 	public String deleteProject(int pid);
-	public String updateProject( Project p);
-	public List<Project> viewAllProjects(int sid);
+	public String updateProject( ProjectDTO p);
+	public List<ProjectDTO> viewAllProjects(int sid);
 	  public void createPortfolio(
 	            List<Certifications> certifications,
 	            List<Education> education,
@@ -47,6 +48,10 @@ public interface StudentService
 	 public long projectcount(int sid);
 	public List<ProjectFeedback> viewmyfeedback(int sid);
 			
+	 public ProjectDTO toDTO(Project project) ;
+	 
+	public Project viewProjectByID(int projectId);
+	public ProjectDTO trackProjectByID(int projectId);
 	
 //
 	       
