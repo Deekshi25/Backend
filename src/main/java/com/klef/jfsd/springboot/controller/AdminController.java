@@ -195,6 +195,23 @@ public class AdminController
 			return service.viewfeedback();
 		}
 	    
+	    @GetMapping("studentcount")
+	    public long studentcount()
+	    {
+	    	return service.studentcount();
+	    }
+	    
+	    @GetMapping("facultycount")
+	    public long facultycount()
+	    {
+	    	return service.facultycount();
+	    }
+	    
+	    @GetMapping("projectcount")
+	    public long projectcount()
+	    {
+	    	return service.projectcount();
+	    }
 	  
 	
 }

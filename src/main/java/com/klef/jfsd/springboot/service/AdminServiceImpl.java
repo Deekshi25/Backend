@@ -456,4 +456,25 @@ public class AdminServiceImpl implements AdminService
 	public List<ProjectFeedback> viewfeedback() {
 		return projectFeedbackRepository.findAll();
 	}
+
+
+	@Override
+	public long studentcount() {
+		// TODO Auto-generated method stub
+		return studentRepository.count();
+	}
+
+
+	@Override
+	public long facultycount() {
+		// TODO Auto-generated method stub
+		return facultyRepository.count();
+	}
+
+
+	@Override
+	public long projectcount() {
+		// TODO Auto-generated method stub
+		return projectRepository.count();
+	}
 }

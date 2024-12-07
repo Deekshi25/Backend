@@ -35,4 +35,7 @@ public interface AdminService
 	public List<ProjectFeedback> viewfeedback();
 	public String processAndSaveFacultyCSV(MultipartFile file) throws Exception;
 	public List<Faculty> parseFacultyCSV(MultipartFile file) throws Exception;
+	public long studentcount();
+	public long facultycount();
+	public long projectcount();
 }
