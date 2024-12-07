@@ -12,8 +12,8 @@ public class WebConfig implements WebMvcConfigurer
     @Override
     public void addCorsMappings(CorsRegistry registry) 
     {
-    	registry.addMapping("/*") // Allow CORS 
-                .allowedOrigins("http://localhost:5173")
+      registry.addMapping("/**") // Allow CORS 
+          .allowedOrigins("https://elegant-dolphin-3995b8.netlify.app/")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);
