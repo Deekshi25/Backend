@@ -31,6 +31,13 @@ import jakarta.mail.internet.MimeMessage;
 @RestController
 public class AdminController
 {
+	@GetMapping("/")
+	public String demo()
+	{
+		return "Demo";
+	}
+	
+	
 	@Autowired
 	private AdminService service;
 	
