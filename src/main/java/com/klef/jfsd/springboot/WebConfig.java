@@ -13,7 +13,7 @@ public class WebConfig implements WebMvcConfigurer
     public void addCorsMappings(CorsRegistry registry) 
     {
       registry.addMapping("/**") // Allow CORS 
-          .allowedOrigins("https://elegant-dolphin-3995b8.netlify.app/")
+          .allowedOrigins("https://sdp19frontend.netlify.app/")
                 .allowedMethods("GET", "POST", "PUT", "DELETE")
                 .allowedHeaders("*")
                 .allowCredentials(true);
